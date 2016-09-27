@@ -9,20 +9,19 @@ import java.util.Stack;
  *
  * @author Owner
  */
-public class RPN {
-    private static double answer = 0.0;
-    private static double operandOne;
-    private static double operandTwo;
-    private static Stack<Double> operands = new Stack<Double>();
-    
+public class RPN {    
     public static void main(String [] args) {
-        String s = "23.3 5 16.2 10 10 10 + 8 * -";
+        String s = "23.3 5 16.2 + 8 * -";
         
         calculateFromString(s);
     }
     
     public static double calculateFromString(String input) {
         Scanner scan = new Scanner(input).useDelimiter(" ");
+        double answer = 0.0;
+        double operandOne;
+        double operandTwo;
+        Stack<Double> operands = new Stack<Double>();
         
         try {
             while (scan.hasNext()) {
@@ -32,28 +31,29 @@ public class RPN {
                 } 
                 else {
                     String operator = scan.next();
+                    
+                    if (operands.size() < 2) {
+                        throw new InvalidRPNStringException("Not enough "
+                                + "operands");
+                    }
+                            
+                    operandTwo = operands.pop();
+                    operandOne = operands.pop();
+                    
                     switch (operator) {
                         case "+":
-                            determineOperands();
-
                             operands.push(operandOne + operandTwo);
                             break;
 
                         case "-":
-                            determineOperands();
-
                             operands.push(operandOne - operandTwo);
                             break;
 
                         case "*":
-                            determineOperands();
-
                             operands.push(operandOne * operandTwo);
                             break;
 
                         case "/":
-                            determineOperands();
-                            
                             if (operandTwo == 0.0) {
                                 throw new InvalidRPNStringException("Divison "
                                         + "by zero is not allowed");
@@ -64,8 +64,8 @@ public class RPN {
 
                         default:
                             throw new InvalidRPNStringException("Only numbers "
-                                    + "and these operators (+, -, *, /) "
-                                    + "are valid input");
+                                    + "and operators (+, -, *, /) delimited by "
+                                    + "single spaces are valid input");
                     }
                 }
             }
@@ -88,15 +88,5 @@ public class RPN {
         System.out.println(formatter.format(answer));
         
         return answer;        
-    }
-    
-    private static void determineOperands() {
-        if (operands.size() < 2) {
-            throw new InvalidRPNStringException("Not "
-                    + "enough operands");
-        }
-                            
-        operandTwo = operands.pop();
-        operandOne = operands.pop();
     }
 }

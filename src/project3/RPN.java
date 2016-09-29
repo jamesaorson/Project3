@@ -10,14 +10,8 @@ import java.util.Stack;
  * @author Owner
  */
 public class RPN {    
-    public static void main(String [] args) {
-        String s = "23.3 5 16.2 + 8 * -";
-        
-        calculateFromString(s);
-    }
-    
     public static double calculateFromString(String input) {
-        Scanner scan = new Scanner(input).useDelimiter(" ");
+        Scanner scan = new Scanner(input);
         double answer = 0.0;
         double operandOne;
         double operandTwo;
@@ -62,6 +56,15 @@ public class RPN {
                             operands.push(operandOne / operandTwo);
                             break;
 
+                        case "%":
+                            if (operandTwo == 0.0) {
+                                throw new InvalidRPNStringException("Divison "
+                                        + "by zero is not allowed");
+                            }
+                            
+                            operands.push(operandOne % operandTwo);
+                            break;
+                            
                         default:
                             throw new InvalidRPNStringException("Only numbers "
                                     + "and operators (+, -, *, /) delimited by "

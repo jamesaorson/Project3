@@ -14,19 +14,21 @@ import java.util.Stack;
   * Created:  Sept 26 2016
   * ©Copyright James Osborne. All rights reserved.
   * Summary of Modifications:
-  *     26 Sept 2016 – JAO – Created calculateFromString() method, set up switch
+  *     26 Sept 2016 – JAO – Created calculateFromString() method, made switch
   *     statement, and had input coming from a main. Was calculating correctly.
   *     27 Sept 2016 - JAO - Started error testing and set up try-catch.
   *     28 Sept 2016 - JAO - Removed main method and set up jUnit testing
   *     06 Oct  2016 - JAO - Removed decimal formatting and println(). Fixed
   *     various issues regarding the wrong message being given to exceptions.
+  *     10 Oct  2016 - JAO - Moved try block to be more compactly wrapped
+  *     around the potential problem area.
   * 
   * Description: This class provides a static method for calculating doubles
   * with any of the basic operators (+, -, *, /) by using RPN. This method
   * throws an InvalidRPNString exception for any issue that occurs,
   * but it has a custom message regarding the situation.
   */
-public class RPNCalculator {    
+public class RPNCalculator {
     
     /**
       * Calculates basic mathematic operations (+, -, *, /) from a String
@@ -49,23 +51,31 @@ public class RPNCalculator {
         //results pushed back onto it.
         Stack<Double> operands = new Stack<Double>();
         
-        try {
-            //As long as the input String has something for the method to read,
-            //it will continue parsing.
-            while (scan.hasNext()) {
-                //Checks for numbers to be pushed onto the stack.
-                if (scan.hasNextDouble()) {
-                    double num = scan.nextDouble();
-                    operands.push(num);
-                } 
-                else {
+        //As long as the input String has something for the method to read,
+        //it will continue parsing.
+        while (scan.hasNext()) {
+            //Checks for numbers to be pushed onto the stack.
+            if (scan.hasNextDouble()) {
+                double num = scan.nextDouble();
+                operands.push(num);
+            } 
+            else {
+                try {
                     String operator = scan.next();
                     
                     //Since a number was not read, what was read is assumed
                     //to be an operator and will be checked through a switch()
                     switch (operator) {
-                        //The top of the stack should be the second operaand
-                        //due to the LIFO (Last In, First Out) nature of a stack
+                        //The top of the stack should be the second operand due
+                        //to the LIFO (Last In, First Out) nature of a stack.
+                        
+                        //The pops must be done within the switch conditions
+                        //in order to catch situations where the input had no
+                        //operands. An exception with an error message saying
+                        //"Not enough operands" rather than informing of 
+                        //invalid input. An EmptyStackException will be thrown
+                        //if there are not enough elements in the stack, and
+                        //that exception is caught and re-thrown later.
                         case "+":
                             operandTwo = operands.pop();
                             operandOne = operands.pop();
@@ -100,29 +110,30 @@ public class RPNCalculator {
                             
                             operands.push(operandOne / operandTwo);
                             break;
-                            
+
                         //If the encountered String was none of the operators,
                         //the input must have been improper and an
                         //InvalidRPNStringException is thrown.
                         default:
                             throw new InvalidRPNStringException("Only numbers "
                                     + "and operators (+, -, *, /) delimited by "
-                                    + "single spaces are valid input");
+                                    + "whitespace are valid input");
                     }
+                }
+                
+                //If an EmptyStackException is thrown, it is caught here so it
+                //can be re-thrown with an explanatory exception to the user.
+                //This hides the inner workings of the RPN calculator, 
+                //for a user does not need to know that we are using a stack
+                //and that was what went wrong.
+                catch (EmptyStackException e) {
+                    throw new InvalidRPNStringException("Not enough operands");
                 }
             }
         }
-        
-        //If an EmptyStackException is thrown, it is caught here so it can be
-        //re-thrown with an explanatory exception to the user. This hides the
-        //inner workings of the RPN calculator, for a user does not need
-        //to know that we are using a stack and that was what went wrong.
-        catch (EmptyStackException e) {
-            throw new InvalidRPNStringException("Not enough operands");
-        }
-        
+
         //Only if the string is completely empty, or has only whitespace,
-        //will this condition be true
+        //will this condition be true.
         if (operands.isEmpty()) {
             throw new InvalidRPNStringException("Empty input is not valid");
         }
@@ -132,6 +143,7 @@ public class RPNCalculator {
             throw new InvalidRPNStringException("Not enough operators");
         }
  
+        //Pop the answer off of the stack.
         answer = operands.pop();
         
         return answer; 

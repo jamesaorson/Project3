@@ -8,8 +8,11 @@ import org.junit.rules.ExpectedException;
 public class RPNJUnit {
     private RPNCalculator rpn = new RPNCalculator();
     
+    //These tests simply test the accuracy of the calcluator, making sure
+    //it can handle all of the basic operations on their own
+    //and in complex combinations.
     @Test
-    public void answerTesting () {
+    public void answerTesting() {
         assertEquals(10, rpn.calculateFromString("5 5 +"), 0.000001);
         assertEquals(10, rpn.calculateFromString("20 10 -"), 0.000001);
         assertEquals(100, rpn.calculateFromString("10 10 *"), 0.000001);
@@ -27,6 +30,8 @@ public class RPNJUnit {
     
     @Rule public ExpectedException expected = ExpectedException.none();
     
+    //This tests the ability for the calculator to detect a lack of
+    //necessary operands and throws the correct exception message.
     @Test
     public void tooFewOperands() {
         expected.expect(InvalidRPNStringException.class);
@@ -35,6 +40,18 @@ public class RPNJUnit {
         rpn.calculateFromString("5 2 + +");
     }
     
+    //This tests the ability for the calculator to detect a lack of
+    //necessary operators and throws the correct exception message.
+    @Test
+    public void tooFewOperators() {
+        expected.expect(InvalidRPNStringException.class);
+        expected.expectMessage("Not enough operators");
+        
+        rpn.calculateFromString("5 5 5 +");
+    }
+
+    //This tests the ability for the calculator to detect the specific use
+    //of an empty string.
     @Test
     public void emptyInputString() {
         expected.expect(InvalidRPNStringException.class);
@@ -43,14 +60,8 @@ public class RPNJUnit {
         rpn.calculateFromString("");
     }
     
-    @Test
-    public void tooFewOperators() {
-        expected.expect(InvalidRPNStringException.class);
-        expected.expectMessage("Not enough operators");
-        
-        rpn.calculateFromString("5 5 5 +");
-    }
-    
+    //This tests the ability for the calculator to detect
+    //an attempt at division by zero.
     @Test
     public void divisionByZero() {        
         expected.expect(InvalidRPNStringException.class);
@@ -59,11 +70,13 @@ public class RPNJUnit {
         rpn.calculateFromString("5 0 /");
     }
     
+    //This tests the ability for the calculator to detect input which includes
+    //characters other than numbers and the approved operators (+, -, *, /)
     @Test
     public void invalidCharacters() {
         expected.expect(InvalidRPNStringException.class);
         expected.expectMessage("Only numbers and operators (+, -, *, /) "
-                           + "delimited by single spaces are valid input");
+                               + "delimited by whitespace are valid input");
         
         rpn.calculateFromString("hi mom");
     }
